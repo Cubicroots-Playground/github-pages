@@ -18,6 +18,8 @@ jobs:
       spec_filename: swagger.yaml
 
   deploy:
+    needs: 
+      - render_openapi_spec
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
