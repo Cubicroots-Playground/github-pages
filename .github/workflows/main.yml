@@ -1,0 +1,39 @@
+name: Main
+on:
+  push:
+
+jobs:
+  build_openapi_spec:
+    uses: CubicrootXYZ/Workflows/.github/workflows/openapi2_golang_build.yaml@v0.0.10
+    with:
+      entrypoint: cmd/main.go
+
+  render_openapi_spec:
+    needs: 
+      - build_openapi_spec
+    uses: CubicrootXYZ/Workflows/.github/workflows/openapi2_render.yaml@v0.0.10
+    with:
+      spec_artifact_name: openapi-spec
+      spec_artifact_path: docs/
+      spec_filename: swagger.yaml
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: rendered-api-docu
+          path: index.html
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
